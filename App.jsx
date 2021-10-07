@@ -12,6 +12,9 @@ const App = () => (
   <NavigationContainer>
     <Stack.Navigator
       initialRouteName="Start"
+      screenOptions={{
+        headerShown: false,
+      }}
     >
       <Stack.Screen
         name="Start"
