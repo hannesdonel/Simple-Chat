@@ -30,6 +30,9 @@ const stylesStart = StyleSheet.create({
     color: colors.white,
     marginTop: '33%',
   },
+  textInputWrapper: {
+    width: '100%',
+  },
   textInput: {
     padding: 10,
     height: 40,
@@ -37,6 +40,11 @@ const stylesStart = StyleSheet.create({
     borderColor: colors.grey,
     borderWidth: 1,
     borderRadius: 2,
+  },
+  textInputValidation: {
+    position: 'absolute',
+    marginTop: 40,
+    color: colors.red,
   },
   colorWrapper: {
     width: '100%',
@@ -62,6 +70,11 @@ const stylesStart = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 25,
+  },
+  colorPickerValidation: {
+    position: 'absolute',
+    marginTop: 40,
+    color: colors.red,
   },
   button: {
     justifyContent: 'center',

@@ -5,6 +5,7 @@ const colors = {
   lilaDark: '#474056',
   lilaLight: '#757083',
   green: '#B9C6AE',
+  red: 'red',
 };
 
 export default colors;

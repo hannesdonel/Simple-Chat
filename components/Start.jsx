@@ -12,16 +12,48 @@ import colors from './colors';
 
 // Background Image
 const image = require('../public/Background_Image.png');
-const icon = require('../public/icon.svg');
 
 const Start = () => {
   const [name, setName] = useState('');
-  const [activeColor, setActiveColor] = useState(colors.white);
+  const [activeColor, setActiveColor] = useState(null);
+  const [validation, setValidation] = useState(true);
+  const [buttonActive, setButtonActive] = useState(false);
 
   const navigation = useNavigation();
 
   const handleOnPress = (color) => {
+    if (name !== '' && color !== null) {
+      setButtonActive(true);
+    }
     setActiveColor(color);
+  };
+
+  const validate = () => {
+    if (name !== '' && activeColor !== null) {
+      setValidation(true);
+      navigation.navigate('Chat', { name, activeColor });
+    }
+    if (name === '') {
+      setValidation(false);
+      setButtonActive(false);
+    }
+    if (activeColor === null) {
+      setActiveColor(false);
+      setButtonActive(false);
+    }
+  };
+
+  const onType = (value) => {
+    setName(value);
+    if (value !== '' && activeColor !== null) {
+      setButtonActive(true);
+    }
+    if (value !== '') {
+      setValidation(true);
+    } else {
+      setButtonActive(false);
+      setValidation(false);
+    }
   };
 
   return (
@@ -42,15 +74,24 @@ const Start = () => {
           {/* Input Box */}
 
           <View style={stylesStart.box2}>
-            <TextInput
-              style={[stylesStart.textInput, styles.marginTop, styles.marginBottom]}
-              onChangeText={setName}
-              blurOnSubmit
-              autoCompleteType="name"
-              placeholder="Your name"
-              value={name}
-              left={icon}
-            />
+            <View style={stylesStart.textInputWrapper}>
+              <TextInput
+                style={stylesStart.textInput}
+                onChangeText={onType}
+                blurOnSubmit
+                autoCompleteType="name"
+                placeholder="Your name"
+                value={name}
+              />
+              <Text style={
+                validation
+                  ? [stylesStart.textInputValidation, { height: 0 }]
+                  : stylesStart.textInputValidation
+              }
+              >
+                Please enter your name
+              </Text>
+            </View>
             <View style={stylesStart.colorWrapper}>
               <View>
                 <Text style={stylesStart.colorPickerText}>
@@ -78,11 +119,23 @@ const Start = () => {
                   activeColor={activeColor}
                   handleOnPress={handleOnPress}
                 />
+                <Text style={
+                activeColor !== false
+                  ? [stylesStart.colorPickerValidation, { height: 0 }]
+                  : stylesStart.colorPickerValidation
+                  }
+                >
+                  Please choose a color
+                </Text>
               </View>
             </View>
             <Pressable
-              style={stylesStart.button}
-              onPress={() => navigation.navigate('Chat', { name, activeColor })}
+              style={
+                buttonActive
+                  ? stylesStart.button
+                  : [stylesStart.button, { opacity: 0.7 }]
+              }
+              onPress={() => validate()}
             >
               <Text style={stylesStart.buttonText}>Start Chatting</Text>
             </Pressable>
