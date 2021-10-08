@@ -16,22 +16,30 @@ const image = require('../public/Background_Image.png');
 const Start = () => {
   const [name, setName] = useState('');
   const [activeColor, setActiveColor] = useState(null);
+  const [bubbleColor, setBubbleColor] = useState(null);
+  const [textColor, setTextColor] = useState(null);
   const [validation, setValidation] = useState(true);
   const [buttonActive, setButtonActive] = useState(false);
 
   const navigation = useNavigation();
 
-  const handleOnPress = (color) => {
-    if (name !== '' && color !== null) {
+  // Actions that fires on START CHATTING button press
+  const handleOnPress = (color1, color2, color3) => {
+    if (name !== '' && color1 !== null) {
       setButtonActive(true);
     }
-    setActiveColor(color);
+    setActiveColor(color1);
+    setBubbleColor(color2);
+    setTextColor(color3);
   };
 
+  // Check if name is provided and color is chosen
   const validate = () => {
     if (name !== '' && activeColor !== null) {
       setValidation(true);
-      navigation.navigate('Chat', { name, activeColor });
+      navigation.navigate('Chat', {
+        name, activeColor, bubbleColor, textColor,
+      });
     }
     if (name === '') {
       setValidation(false);
@@ -43,6 +51,7 @@ const Start = () => {
     }
   };
 
+  // Check again if name is provided and color is chosen
   const onType = (value) => {
     setName(value);
     if (value !== '' && activeColor !== null) {
@@ -58,6 +67,8 @@ const Start = () => {
 
   return (
     <View style={styles.containerCenter}>
+
+      {/* Background Image */}
       <ImageBackground
         source={image}
         resizeMode="cover"
@@ -92,6 +103,9 @@ const Start = () => {
                 Please enter your name
               </Text>
             </View>
+
+            {/* Color Picker */}
+
             <View style={stylesStart.colorWrapper}>
               <View>
                 <Text style={stylesStart.colorPickerText}>
@@ -129,6 +143,9 @@ const Start = () => {
                 </Text>
               </View>
             </View>
+
+            {/* Start chatting button */}
+
             <Pressable
               style={
                 buttonActive
