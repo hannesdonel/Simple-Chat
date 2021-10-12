@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Text, Platform, KeyboardAvoidingView, SafeAreaView, LogBox,
+  View, Text, Platform, KeyboardAvoidingView, SafeAreaView, LogBox,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import {
-  GiftedChat, Day, SystemMessage, Bubble,
+  GiftedChat, Day, SystemMessage, Bubble, InputToolbar,
 } from 'react-native-gifted-chat';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import firebase from '../firebase';
 
 import styles from './styles';
+import stylesChat from './stylesChat';
 
 // Disable timer alert in console
 LogBox.ignoreLogs(['Setting a timer']);
@@ -20,6 +23,8 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uid, setUid] = useState('');
+  const [isOnline, setIsOnline] = useState('idle');
+  const [isTyping, setIsTyping] = useState(false);
 
   const route = useRoute();
   const navigation = useNavigation();
@@ -32,6 +37,21 @@ const Chat = () => {
   // Connect to Firebase
   const db = firebase.firestore();
   const chatMessageReference = db.collection('messages');
+  const metadataReference = db.collection('metadata');
+
+  // Make Unsubscription accessable outise useEffect
+  let authUnsubscribe = () => { };
+  let unsubscribeMessageReference = () => { };
+  let unsubscribeMetadataReference = () => { };
+
+  // Get network state
+  const onNetworkChange = (state) => {
+    if (!state.isConnected) {
+      setIsOnline(false);
+    } else if (state.isConnected) {
+      setIsOnline(true);
+    }
+  };
 
   // Construct welcome message
   const initialMessages = [
@@ -55,47 +75,125 @@ const Chat = () => {
     },
   ];
 
-  // Get data from Firebase
+  // Retrieve messages from local storage
+  const getMessages = async () => {
+    let storedMessages = '';
+    try {
+      storedMessages = await AsyncStorage.getItem('messages') || initialMessages;
+      if (storedMessages === initialMessages) {
+        setMessages(initialMessages);
+      } else {
+        setMessages(JSON.parse(storedMessages));
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Store messages in local storage
+  const saveMessages = async (elements) => {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(elements));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Clear local storage
+  const deleteMessages = async () => {
+    try {
+      await AsyncStorage.removeItem('messages');
+      setMessages(initialMessages);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Retrieve UID from local storage
+  const getUid = async () => {
+    let uId = '';
+    try {
+      uId = await AsyncStorage.getItem('uid') || '';
+      setUid(JSON.parse(uId));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Store UID in local storage
+  const saveUid = async (id) => {
+    try {
+      await AsyncStorage.setItem('uid', JSON.stringify(id));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Get messages from Firebase
   const onCollectionUpdate = (querySnapshot) => {
-    setLoading(true);
     const fetchedMessages = querySnapshot.docs.map((element) => {
       const {
-        _id, text, createdAt, user, dbUid,
+        _id, text, createdAt, user,
       } = element.data();
       return {
         _id,
         text,
         createdAt: Date.parse(createdAt.toDate()),
         user,
-        dbUid,
       };
     });
     initialMessages.forEach((element) => fetchedMessages.push(element));
     const newMessages = fetchedMessages.sort((a, b) => b.createdAt - a.createdAt);
     setMessages(newMessages);
-    setLoading(false);
+    saveMessages(newMessages);
   };
 
-  // Send message
-  const onSend = (message) => chatMessageReference.add(message[0]);
+  // Get metadata from Firebase
+  const onMetadataUpdate = (querySnapshot) => {
+    const metadata = querySnapshot.docs.map((element) => element.data());
+    if (metadata[0].uid !== uid) {
+      setIsTyping(metadata[0].isTyping);
+    }
+    setTimeout(() => metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false }), 10000);
+  };
 
   useEffect(() => {
+    setLoading(true);
+    const unsubscribeNetInfo = NetInfo.addEventListener(onNetworkChange);
     navigation.setOptions({ title: name });
-    const authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      if (!user) {
-        setLoading(true);
-        firebase.auth().signInAnonymously();
-        setLoading(false);
-      }
-      setUid(user.uid);
-      setMessages([]);
-    });
-    const unsubscribe = chatMessageReference.onSnapshot(onCollectionUpdate);
+
+    // Authentication
+    const authentication = () => {
+      authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+        if (!user) {
+          firebase.auth().signInAnonymously();
+        }
+        setUid(user.uid);
+        saveUid(user.uid);
+      });
+    };
+
+    // Check if online
+    // online
+    if (isOnline && isOnline !== 'idle') {
+      authentication();
+      unsubscribeMessageReference = chatMessageReference.onSnapshot(onCollectionUpdate);
+      unsubscribeMetadataReference = metadataReference.onSnapshot(onMetadataUpdate);
+      setLoading(false);
+    } else {
+      // offline
+      getUid();
+      getMessages();
+      setLoading(false);
+    }
+
     return () => {
       authUnsubscribe();
-      unsubscribe();
+      unsubscribeMessageReference();
+      unsubscribeMetadataReference();
+      unsubscribeNetInfo();
     };
-  }, []);
+  }, [isOnline, uid]);
 
   // Change color of Date
   /* eslint-disable-next-line */
@@ -109,7 +207,7 @@ const Chat = () => {
   const renderBubble = (props) => (
     <Bubble
     /* eslint-disable-next-line */
-      {...props}
+    {...props}
       wrapperStyle={{
         right: {
           backgroundColor: bubbleColor, textColor,
@@ -117,6 +215,43 @@ const Chat = () => {
       }}
     />
   );
+
+  // Hide Input when offline
+  const renderInput = (props) => {
+    if (isOnline) {
+      return (
+      /* eslint-disable-next-line */
+          <InputToolbar {...props} />
+      );
+    }
+    return (
+      <View style={stylesChat.offlineInputWrapper}>
+        <Text style={stylesChat.offlineInput}>You are currently offline.</Text>
+      </View>
+    );
+  };
+
+  // Send message
+  const onSend = (message) => {
+    if (message[0].text === 'DELETE_STORAGE') {
+      deleteMessages();
+      setTimeout(() => metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false }), 4000);
+    } else {
+      chatMessageReference.add(message[0]);
+      setTimeout(() => metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false }), 4000);
+    }
+  };
+
+  // On isTyping
+  const onTyping = (value) => {
+    if (value === '') {
+      metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false });
+    } else {
+      metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: true, uid });
+    }
+  };
+
+  // Render component
 
   if (loading) {
     // Loading Screen
@@ -138,6 +273,10 @@ const Chat = () => {
           name,
         }}
         alignTop={false}
+        scrollToBottom
+        onInputTextChanged={onTyping}
+        isTyping={isTyping}
+        renderInputToolbar={renderInput}
         renderUsernameOnMessage
         renderDay={renderDay}
         renderSystemMessage={renderSystemMessage}

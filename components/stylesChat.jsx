@@ -3,9 +3,14 @@ import { StyleSheet } from 'react-native';
 import colors from './colors';
 
 const stylesChat = StyleSheet.create({
-  welcome: {
-    fontSize: 16,
+  offlineInputWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: colors.red,
+  },
+  offlineInput: {
     color: colors.white,
+    textAlign: 'center',
   },
 });
 
