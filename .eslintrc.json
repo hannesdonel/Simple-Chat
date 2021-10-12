@@ -23,6 +23,7 @@
         "react-native/no-unused-styles": 2,
         "react-native/no-inline-styles": 2,
         "react-native/no-color-literals": 2,
-        "react/prop-types": "off"
+        "react/prop-types": "off",
+        "no-underscore-dangle": "off"
     }
 }
