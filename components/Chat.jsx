@@ -23,7 +23,12 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uid, setUid] = useState('');
-  const [isOnline, setIsOnline] = useState('idle');
+  const { ONLINE, OFFLINE, IDLE } = {
+    ONLINE: 'ONLINE',
+    OFFLINE: 'OFFLINE',
+    IDLE: 'IDLE',
+  };
+  const [isOnline, setIsOnline] = useState(IDLE);
   const [isTyping, setIsTyping] = useState(false);
 
   const route = useRoute();
@@ -47,9 +52,9 @@ const Chat = () => {
   // Get network state
   const onNetworkChange = (state) => {
     if (!state.isConnected) {
-      setIsOnline(false);
+      setIsOnline(OFFLINE);
     } else if (state.isConnected) {
-      setIsOnline(true);
+      setIsOnline(ONLINE);
     }
   };
 
@@ -175,7 +180,7 @@ const Chat = () => {
 
     // Check if online
     // online
-    if (isOnline && isOnline !== 'idle') {
+    if (isOnline === ONLINE && isOnline !== IDLE) {
       authentication();
       unsubscribeMessageReference = chatMessageReference.onSnapshot(onCollectionUpdate);
       unsubscribeMetadataReference = metadataReference.onSnapshot(onMetadataUpdate);
@@ -218,7 +223,7 @@ const Chat = () => {
 
   // Hide Input when offline
   const renderInput = (props) => {
-    if (isOnline) {
+    if (isOnline === ONLINE) {
       return (
       /* eslint-disable-next-line */
           <InputToolbar {...props} />
