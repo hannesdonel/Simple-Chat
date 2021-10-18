@@ -2,7 +2,7 @@
 
 This is a real-time chat app built with React native. You can enter the chat without a registration and just start chatting.
 
-<img src="./assets/example1.jpg" alt="Example Image 1" height="720"><img src="./assets/example2.jpg" alt="Example Image 2" height="720">
+<img src="./assets/example1.jpg" alt="Example Image 1" height="720">    <img src="./assets/example2.jpg" alt="Example Image 2" height="720">
 
 # Functionality
 
