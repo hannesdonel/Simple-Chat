@@ -1,26 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, Platform, KeyboardAvoidingView, SafeAreaView, LogBox,
+  Platform, KeyboardAvoidingView, SafeAreaView, LogBox,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import {
-  GiftedChat, Day, SystemMessage, Bubble, InputToolbar,
-} from 'react-native-gifted-chat';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GiftedChat } from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
-import firebase from '../firebase';
+import { chatMessageReference, metadataReference, firebaseAuth } from '../firebase';
+
+import Loader from './Loader';
 
 import styles from './styles';
-import stylesChat from './stylesChat';
+import giftedChatServices from '../services/giftedChatServices';
+import dbServices from '../services/dbServices';
 
-// Disable timer alert in console
-LogBox.ignoreLogs(['Setting a timer']);
+// Disable timer alert in Expo console
+LogBox.ignoreLogs(['Setting a timer', 'Animated: `useNativeDriver`', 'Animated.event']);
 
 // Import Chat Bot avatar
 const chatBot = require('../public/chat_bot.png');
 
 const Chat = () => {
+  // SET STATE
   const [messages, setMessages] = useState([]);
+  const [imagePick, setImagePick] = useState('');
   const [loading, setLoading] = useState(false);
   const [uid, setUid] = useState('');
   const { ONLINE, OFFLINE, IDLE } = {
@@ -30,33 +32,16 @@ const Chat = () => {
   };
   const [isOnline, setIsOnline] = useState(IDLE);
   const [isTyping, setIsTyping] = useState(false);
+  const [showSend, setShowSend] = useState(false);
 
-  const route = useRoute();
+  // Initiate navigation features
   const navigation = useNavigation();
 
   // Get name and colors from Start screen
+  const route = useRoute();
   const {
     name, activeColor, bubbleColor, textColor,
   } = route.params;
-
-  // Connect to Firebase
-  const db = firebase.firestore();
-  const chatMessageReference = db.collection('messages');
-  const metadataReference = db.collection('metadata');
-
-  // Make Unsubscription accessable outise useEffect
-  let authUnsubscribe = () => { };
-  let unsubscribeMessageReference = () => { };
-  let unsubscribeMetadataReference = () => { };
-
-  // Get network state
-  const onNetworkChange = (state) => {
-    if (!state.isConnected) {
-      setIsOnline(OFFLINE);
-    } else if (state.isConnected) {
-      setIsOnline(ONLINE);
-    }
-  };
 
   // Construct welcome message
   const initialMessages = [
@@ -80,88 +65,51 @@ const Chat = () => {
     },
   ];
 
-  // Retrieve messages from local storage
-  const getMessages = async () => {
-    let storedMessages = '';
-    try {
-      storedMessages = await AsyncStorage.getItem('messages') || initialMessages;
-      if (storedMessages === initialMessages) {
-        setMessages(initialMessages);
-      } else {
-        setMessages(JSON.parse(storedMessages));
-      }
-    } catch (error) {
-      console.log(error.message);
+  // Get all data related services
+  const dbServicesProps = {
+    setMessages, setUid, setLoading, setIsTyping, uid, initialMessages,
+  };
+  const {
+    saveUid, getUid, onCollectionUpdate, onMetadataUpdate, getMessages,
+  } = dbServices(dbServicesProps);
+
+  // Get Gifted Chat services
+  const giftedChatServicesProps = {
+    setMessages,
+    setLoading,
+    setImagePick,
+    setShowSend,
+    initialMessages,
+    imagePick,
+    bubbleColor,
+    uid,
+    name,
+    textColor,
+    activeColor,
+    isOnline,
+    showSend,
+    ONLINE,
+  };
+  const {
+    onSend, onTyping, renderCustomView, customSendButton, renderAttachement,
+    renderCustomActions, renderInput, renderDay, renderSystemMessage, renderBubble,
+  } = giftedChatServices(giftedChatServicesProps);
+
+  // Get network state
+  const onNetworkChange = (state) => {
+    if (!state.isConnected) {
+      setIsOnline(OFFLINE);
+    } else if (state.isConnected) {
+      setIsOnline(ONLINE);
     }
   };
 
-  // Store messages in local storage
-  const saveMessages = async (elements) => {
-    try {
-      await AsyncStorage.setItem('messages', JSON.stringify(elements));
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+  // Make Unsubscription accessable outise useEffect
+  let authUnsubscribe = () => { };
+  let unsubscribeMessageReference = () => { };
+  let unsubscribeMetadataReference = () => { };
 
-  // Clear local storage
-  const deleteMessages = async () => {
-    try {
-      await AsyncStorage.removeItem('messages');
-      setMessages(initialMessages);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  // Retrieve UID from local storage
-  const getUid = async () => {
-    let uId = '';
-    try {
-      uId = await AsyncStorage.getItem('uid') || '';
-      setUid(JSON.parse(uId));
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  // Store UID in local storage
-  const saveUid = async (id) => {
-    try {
-      await AsyncStorage.setItem('uid', JSON.stringify(id));
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  // Get messages from Firebase
-  const onCollectionUpdate = (querySnapshot) => {
-    const fetchedMessages = querySnapshot.docs.map((element) => {
-      const {
-        _id, text, createdAt, user,
-      } = element.data();
-      return {
-        _id,
-        text,
-        createdAt: Date.parse(createdAt.toDate()),
-        user,
-      };
-    });
-    initialMessages.forEach((element) => fetchedMessages.push(element));
-    const newMessages = fetchedMessages.sort((a, b) => b.createdAt - a.createdAt);
-    setMessages(newMessages);
-    saveMessages(newMessages);
-  };
-
-  // Get metadata from Firebase
-  const onMetadataUpdate = (querySnapshot) => {
-    const metadata = querySnapshot.docs.map((element) => element.data());
-    if (metadata[0].uid !== uid) {
-      setIsTyping(metadata[0].isTyping);
-    }
-    setTimeout(() => metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false }), 10000);
-  };
-
+  // USE EFFECT
   useEffect(() => {
     setLoading(true);
     const unsubscribeNetInfo = NetInfo.addEventListener(onNetworkChange);
@@ -169,9 +117,9 @@ const Chat = () => {
 
     // Authentication
     const authentication = () => {
-      authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      authUnsubscribe = firebaseAuth.onAuthStateChanged((user) => {
         if (!user) {
-          firebase.auth().signInAnonymously();
+          firebaseAuth.signInAnonymously();
         }
         setUid(user.uid);
         saveUid(user.uid);
@@ -184,7 +132,6 @@ const Chat = () => {
       authentication();
       unsubscribeMessageReference = chatMessageReference.onSnapshot(onCollectionUpdate);
       unsubscribeMetadataReference = metadataReference.onSnapshot(onMetadataUpdate);
-      setLoading(false);
     } else {
       // offline
       getUid();
@@ -200,94 +147,33 @@ const Chat = () => {
     };
   }, [isOnline, uid]);
 
-  // Change color of Date
-  /* eslint-disable-next-line */
-  const renderDay = (props) => <Day {...props} textStyle={{ color: textColor }} />;
-
-  // Change color of initial message
-  /* eslint-disable-next-line */
-  const renderSystemMessage = (props) => <SystemMessage {...props} textStyle={{ color: textColor }} />;
-
-  // Change color of right chat bubble
-  const renderBubble = (props) => (
-    <Bubble
-    /* eslint-disable-next-line */
-    {...props}
-      wrapperStyle={{
-        right: {
-          backgroundColor: bubbleColor, textColor,
-        },
-      }}
-    />
-  );
-
-  // Hide Input when offline
-  const renderInput = (props) => {
-    if (isOnline === ONLINE) {
-      return (
-      /* eslint-disable-next-line */
-          <InputToolbar {...props} />
-      );
-    }
-    return (
-      <View style={stylesChat.offlineInputWrapper}>
-        <Text style={stylesChat.offlineInput}>You are currently offline.</Text>
-      </View>
-    );
-  };
-
-  // Send message
-  const onSend = (message) => {
-    if (message[0].text === 'DELETE_STORAGE') {
-      deleteMessages();
-      setTimeout(() => metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false }), 4000);
-    } else {
-      chatMessageReference.add(message[0]);
-      setTimeout(() => metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false }), 4000);
-    }
-  };
-
-  // On isTyping
-  const onTyping = (value) => {
-    if (value === '') {
-      metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: false });
-    } else {
-      metadataReference.doc('BS5BwiimxHiTJOfkVaeR').update({ isTyping: true, uid });
-    }
-  };
-
-  // Render component
-
-  if (loading) {
-    // Loading Screen
-    return (
-      <SafeAreaView style={[styles.containerCenter, { backgroundColor: activeColor }]}>
-        <Text style={{ color: textColor }}>loading...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  // Chat Screen
+  // RENDER COMPONENT
   return (
     <SafeAreaView style={[styles.justFlex, { backgroundColor: activeColor }]}>
       <GiftedChat
         messages={messages}
-        onSend={(message) => onSend(message)}
         user={{
           _id: uid,
           name,
         }}
         alignTop={false}
         scrollToBottom
-        onInputTextChanged={onTyping}
         isTyping={isTyping}
+        alwaysShowSend
+        onSend={(message) => onSend(message)}
+        onInputTextChanged={onTyping}
+        renderCustomView={renderCustomView}
+        renderSend={customSendButton}
+        renderChatFooter={renderAttachement}
+        renderActions={renderCustomActions}
         renderInputToolbar={renderInput}
         renderUsernameOnMessage
         renderDay={renderDay}
         renderSystemMessage={renderSystemMessage}
         renderBubble={renderBubble}
       />
-      { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
+      {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
+      {loading ? <Loader /> : null}
     </SafeAreaView>
   );
 };
