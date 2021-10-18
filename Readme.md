@@ -30,10 +30,10 @@ This is a real-time chat app built with React native. You can enter the chat wit
 ## Run the app
 - First of all run:
 
-    npm install
+        npm install
 
 - The start the expo server:
 
-    npm start
+        npm start
 
 - scan QR code with your phone or press a (in the console) to start the app on Android studio or i to run it on an iOS simulator.
