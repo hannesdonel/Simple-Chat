@@ -2,7 +2,7 @@
 
 This is a real-time chat app built with React native. You can enter the chat without a registration and just start chatting.
 
-<img src="./assets/example1.jpg" alt="Example Image 1" height="720">    <img src="./assets/example2.jpg" alt="Example Image 2" height="720">
+<img src="./assets/example1.jpg" alt="Example Image 1" height="720">    - <img src="./assets/example2.jpg" alt="Example Image 2" height="720">
 
 # Functionality
 
@@ -28,11 +28,11 @@ This is a real-time chat app built with React native. You can enter the chat wit
 - If you want to run the app on your device you also need the Expo app. It's available through your App store.
 
 ## Run the app
-First of all run:
+- First of all run:
 
     npm install
 
-The start the expo server:
+- The start the expo server:
 
     npm start
 
