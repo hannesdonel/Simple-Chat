@@ -173,7 +173,6 @@ const giftedChatServices = (giftedChatServicesProps) => {
 
     // On isTyping
     onTyping: (value) => {
-      console.log(imagePick);
       if (value === '' && !imagePick) {
         setShowSend(false);
         services.stopTyping();
