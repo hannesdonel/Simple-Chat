@@ -23,9 +23,18 @@ This is a real-time chat app built with React native. You can enter the chat wit
 
 # Get started
 
+(I'm using npm throughout this tutorial. Of course you can use anything else.)
+
 ## Prerequisites
 - Node.js
-- If you want to run the app on your device you also need the Expo app. It's available through your App store.
+
+        npm install node@lts
+
+- Expo CLI
+
+        npm install --global expo-cli
+
+- If you want to run the app on your device you also need the Expo app for <a href="https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=www">Android</a> or <a href="https://apps.apple.com/app/apple-store/id982107779">iOS</a>. It's available through your App store.
 
 ## Run the app
 - First of all run:
