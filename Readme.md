@@ -2,6 +2,9 @@
 
 This is a real-time chat app built with React native. You can enter the chat without a registration and just start chatting.
 
+![Example image 1](/assets/examplePic_1.jpg)
+![Example image 2](/assets/examplePic_2.jpg)
+
 # Functionality
 
 - You can pick a custom background color and set your chat name
