@@ -10,6 +10,15 @@ const firebaseConfig = {
   appId: '1:585465124585:web:cd59aa5c653cecec780278',
 };
 
+// Setting up Firebase
 firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const chatMessageReference = db.collection('messages');
+const metadataReference = db.collection('metadata');
+const isTypingDoc = metadataReference.doc('BS5BwiimxHiTJOfkVaeR');
+const firebaseAuth = firebase.auth();
+const firebaseStorage = firebase.storage().ref();
 
-export default firebase;
+export {
+  chatMessageReference, metadataReference, isTypingDoc, firebaseAuth, firebaseStorage,
+};

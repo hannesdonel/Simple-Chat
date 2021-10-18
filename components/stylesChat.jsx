@@ -43,6 +43,10 @@ const stylesChat = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
   },
+  loaderWrapper: {
+    height: 50,
+    width: 50,
+  },
   offlineInputWrapper: {
     flex: 1,
     justifyContent: 'center',
