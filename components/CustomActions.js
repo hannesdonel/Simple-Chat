@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Pressable, View, Text, Alert, Keyboard,
 } from 'react-native';
-import { useActionSheet } from 'react-native-gifted-chat/node_modules/@expo/react-native-action-sheet';
+import { useActionSheet } from '@expo/react-native-action-sheet';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 
