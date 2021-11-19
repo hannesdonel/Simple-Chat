@@ -1,8 +1,8 @@
 # Simple Chat
 
-This is a real-time chat app for mobile devices (iOS and Android) built with React Native. The app will provide users with a chat interface, offline function and options to share images and location.
+This is a real-time chat app for mobile devices (iOS and Android) built with React Native. The app will provide users with a chat interface, offline function and options to share images and location. <a href="https://vimeo.com/manage/videos/647875608?embedded=false&source=video_title&owner=20281206">See the app in action.</a>
 
-<img src="./assets/example1.jpg" alt="Example Image 1" width="50%">     <img src="./assets/example2.jpg" alt="Example Image 2" width="50%">
+<img src="./assets/example1.jpg" alt="Example Image 1" width="40%">     <img src="./assets/example2.jpg" alt="Example Image 2" width="40%">
 
 
 ## Technologies
