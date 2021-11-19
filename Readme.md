@@ -1,10 +1,22 @@
 # Simple Chat
 
-This is a real-time chat app built with React native. You can enter the chat without a registration and just start chatting.
+This is a real-time chat app for mobile devices (iOS and Android) built with React Native. The app will provide users with a chat interface, offline function and options to share images and location.
 
 <img src="./assets/example1.jpg" alt="Example Image 1" height="720">    - <img src="./assets/example2.jpg" alt="Example Image 2" height="720">
 
-# Functionality
+
+## Technologies
+
+- React Native
+- JavaScript
+- Google Firebase Database
+- Google Firebase authentication
+- Google Firebase Cloud Storage
+- Expo
+- Gifted Chat library
+
+
+## Functionality
 
 - You can pick a custom background color and set your chat name
 - You can send a pic
@@ -12,20 +24,14 @@ This is a real-time chat app built with React native. You can enter the chat wit
 - You can share your location
 - The entire app is fully compatible with screen readers
 - You can reread your chat timeline offline
+- Data gets stored on- and offline to provide all time access
 
-# Technologies
 
-- React native
-- Javascript
-- Firebase
-- Expo
-- Gifted Chat library
-
-# Get started
+## Get started
 
 (I'm using npm throughout this tutorial. Of course you can use anything else.)
 
-## Prerequisites
+#### Prerequisites
 - Node.js
 
         npm install node@lts
@@ -36,7 +42,7 @@ This is a real-time chat app built with React native. You can enter the chat wit
 
 - If you want to run the app on your device you also need the Expo app for <a href="https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=www">Android</a> or <a href="https://apps.apple.com/app/apple-store/id982107779">iOS</a>. It's available through your App store.
 
-## Run the app
+#### Run the app
 - First of all run:
 
         npm install
