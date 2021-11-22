@@ -51,7 +51,7 @@ This is a real-time chat app for mobile devices (iOS and Android) built with Rea
 
         npm install
 
-- The start the expo server:
+- Then start the expo server:
 
         npm start
 
