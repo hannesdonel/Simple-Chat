@@ -2,7 +2,7 @@
 
 This is a real-time chat app for mobile devices (iOS and Android) built with React Native. The app will provide users with a chat interface, offline function and options to share images and location.
 
-<a href="https://vimeo.com/manage/videos/647875608?embedded=false&source=video_title&owner=20281206">See the app in action.</a>
+<a href="https://vimeo.com/manage/videos/647875608?embedded=false&source=video_title&owner=20281206">See the app in action.</a><br>
 <a href="https://snack.expo.dev/@hannesdonel/9abbd0">Use app with expo snack in your browser.</a>
 
 <img src="./assets/example1.jpg" alt="Example Image 1" width="30%">     <img src="./assets/example2.jpg" alt="Example Image 2" width="30%">
@@ -21,12 +21,13 @@ This is a real-time chat app for mobile devices (iOS and Android) built with Rea
 
 ## Functionality
 
-- You can pick a custom background color and set your chat name
-- You can send a pic
-- You can take a pic and share it
-- You can share your location
-- The entire app is fully compatible with screen readers
-- You can reread your chat timeline offline
+- Select custom background color and chat name
+- Send a pic
+- Take a pic and share it
+- Share your location
+- Ask for OS's permissions to browse data, use camera and mic
+- Fully compatible with screen readers
+- Reread chat timeline offline
 - Data gets stored on- and offline to provide all time access
 
 
