@@ -15,7 +15,7 @@ This is a real-time chat app for mobile devices (iOS and Android) built with Rea
 - Google Firebase Database
 - Google Firebase authentication
 - Google Firebase Cloud Storage
-- Expo
+- expo
 - Gifted Chat library
 
 
